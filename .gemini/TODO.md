@@ -4,31 +4,31 @@
 
 **Goal:** Set up the complete distributed architecture and build the first vertical slice: discovering restaurants.
 
-- [ ] **System Architecture & DevOps**
-  - [ ] Create `docker-compose.yml` for local development (API Gateway, `restaurants-service`, PostgreSQL).
-  - [ ] **API Gateway:**
-    - [ ] Choose and configure an API Gateway (e.g., custom Node.js/Express, or a managed one like Kong/Traefik).
+- [x] **System Architecture & DevOps**
+  - [x] Create `docker-compose.yml` for local development (API Gateway, `restaurants-service`, PostgreSQL).
+  - [x] **API Gateway:**
+    - [x] Choose and configure an API Gateway (e.g., custom Node.js/Express, or a managed one like Kong/Traefik).
   - [ ] **CI/CD:**
     - [ ] Set up a basic CI/CD pipeline structure (e.g., `.github/workflows`) for automated testing and building.
-  - [ ] **Database:**
-    - [ ] Configure PostgreSQL service in `docker-compose.yml`.
+  - [x] **Database:**
+    - [x] Configure PostgreSQL service in `docker-compose.yml`.
 
-- [ ] **Backend (`restaurants-service`)**
-  - [ ] Create a new directory for the service (`services/restaurants`).
-  - [ ] Initialize a new Node.js/Express project.
-  - [ ] Create a `Dockerfile` for this service.
-  - [ ] Implement database connection to the Dockerized PostgreSQL.
-  - [ ] Create schema for `Restaurants`, `MenuItems`, `Reviews`.
-  - [ ] Implement API endpoints (`GET /restaurants`, `GET /restaurants/:id`).
+- [x] **Backend (`restaurants-service`)**
+  - [x] Create a new directory for the service (`services/restaurants`).
+  - [x] Initialize a new Node.js/Express project.
+  - [x] Create a `Dockerfile` for this service.
+  - [x] Implement database connection to the Dockerized PostgreSQL.
+  - [x] Create schema for `Restaurants`, `MenuItems`, `Reviews`.
+  - [x] Implement API endpoints (`GET /restaurants`, `GET /restaurants/:id`).
   - [ ] Create Kubernetes manifests (`deployment.yaml`, `service.yaml`).
 
-- [ ] **Frontend (Host Shell & `discovery` Microfrontend)**
-  - [ ] Configure the existing Next.js app as the "host" shell.
-  - [ ] Set up Module Federation.
-  - [ ] Create the first microfrontend for "discovery" (browsing/searching restaurants).
-  - [ ] The host shell will be responsible for the main layout, navbar, and i18n context.
-  - [ ] The discovery microfrontend will contain the search bar and restaurant list components.
-  - [ ] Connect the frontend to the API Gateway to fetch restaurant data.
+- [x] **Frontend (Host Shell & `discovery` Microfrontend)**
+  - [x] Configure the existing Next.js app as the "host" shell.
+  - [x] Set up Module Federation.
+  - [x] Create the first microfrontend for "discovery" (browsing/searching restaurants).
+  - [x] The host shell will be responsible for the main layout, navbar, and i18n context.
+  - [x] The discovery microfrontend will contain the search bar and restaurant list components.
+  - [x] Connect the frontend to the API Gateway to fetch restaurant data.
 
 ## Phase 2: Users & Engagement
 
