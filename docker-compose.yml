@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: zayto_postgres
+    environment:
+      POSTGRES_USER: zayto
+      POSTGRES_PASSWORD: zayto_password
+      POSTGRES_DB: zayto_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zayto -d zayto_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Placeholder for the first microservice
+  restaurants-service:
+    build:
+      context: ./services/restaurants
+      dockerfile: Dockerfile
+    container_name: zayto_restaurants_service
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgres://zayto:zayto_password@postgres:5432/zayto_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Placeholder for the API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: zayto_api_gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - restaurants-service
+
+volumes:
+  postgres_data:
