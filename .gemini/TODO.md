@@ -8,8 +8,8 @@
   - [x] Create `docker-compose.yml` for local development (API Gateway, `restaurants-service`, PostgreSQL).
   - [x] **API Gateway:**
     - [x] Choose and configure an API Gateway (e.g., custom Node.js/Express, or a managed one like Kong/Traefik).
-  - [ ] **CI/CD:**
-    - [ ] Set up a basic CI/CD pipeline structure (e.g., `.github/workflows`) for automated testing and building.
+  - [x] **CI/CD:**
+    - [x] Set up a basic CI/CD pipeline structure (e.g., `.github/workflows`) for automated testing and building.
   - [x] **Database:**
     - [x] Configure PostgreSQL service in `docker-compose.yml`.
 
@@ -32,16 +32,21 @@
 
 ## Phase 2: Users & Engagement
 
-- [ ] **Backend (`users-service`)**
-  - [ ] Create a new `users-service` for authentication and user profiles.
-  - [ ] Dockerize and add to `docker-compose.yml`.
-  - [ ] Implement `register`, `login`, and profile management endpoints.
+- [x] **Backend (`users-service`)**
+  - [x] Create a new `users-service` for authentication and user profiles.
+  - [x] Dockerize and add to `docker-compose.yml`.
+  - [x] Implement `register`, `login`, and profile management endpoints.
+  - [x] Add OAuth login: Google and Apple ID (token verification, user linking).
+  - [x] Add phone number login with OTP (request/verify) using a provider (e.g., Twilio).
+  - [x] Issue and validate JWT access/refresh tokens; session management.
 - [ ] **Backend (`reviews-service`)**
   - [ ] Create a new `reviews-service` to manage reviews.
   - [ ] Implement endpoints to create and list reviews.
 - [ ] **Frontend**
   - [ ] Create a `profile` microfrontend for user profiles and order history.
   - [ ] Create a `reviews` microfrontend for submitting and viewing reviews.
+  - [ ] Add authentication UI flows: Google, Apple ID, and phone OTP login.
+  - [ ] Persist auth state in the host app and secure API calls.
 
 ## Phase 3: Restaurant Partner Platform
 

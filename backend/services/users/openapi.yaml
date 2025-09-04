@@ -1,0 +1,101 @@
+openapi: 3.0.3
+info:
+  title: Users Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3003
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200': { description: Healthy }
+  /register:
+    post:
+      summary: Register with email/password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+                name: { type: string }
+      responses:
+        '201': { description: Created }
+  /login:
+    post:
+      summary: Login with email/password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200': { description: OK }
+  /profile:
+    get:
+      summary: Get profile (x-user-email)
+      responses:
+        '200': { description: OK }
+  /auth/google:
+    post:
+      summary: Google OAuth login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idToken: { type: string }
+      responses:
+        '200': { description: OK }
+  /auth/apple:
+    post:
+      summary: Apple Sign-in login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identityToken: { type: string }
+      responses:
+        '200': { description: OK }
+  /auth/otp/request:
+    post:
+      summary: Request phone OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+      responses:
+        '200': { description: OK }
+  /auth/otp/verify:
+    post:
+      summary: Verify phone OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+                code: { type: string }
+      responses:
+        '200': { description: OK }
+
+

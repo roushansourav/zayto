@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: [ "backend/api-gateway", "backend/services/restaurants", "frontend" ]
+        project: [ "backend/api-gateway", "backend/services/restaurants", "backend/services/users", "frontend" ]
 
     steps:
       - name: Checkout

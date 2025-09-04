@@ -31,7 +31,12 @@ app.get('/', (req, res) => {
       restaurants: '/api/restaurants',
       'restaurant-details': '/api/restaurants/:id',
       'restaurant-menu': '/api/restaurants/:id/menu',
-      'restaurant-reviews': '/api/restaurants/:id/reviews'
+      'restaurant-reviews': '/api/restaurants/:id/reviews',
+      'users-health': '/api/users/health',
+      'auth-google': '/api/users/auth/google',
+      'auth-apple': '/api/users/auth/apple',
+      'auth-otp-request': '/api/users/auth/otp/request',
+      'auth-otp-verify': '/api/users/auth/otp/verify'
     }
   });
 });
@@ -56,8 +61,19 @@ const restaurantsProxy = createProxyMiddleware({
   }
 });
 
-// Proxy requests to the restaurants service under /api
-app.use('/api', restaurantsProxy);
+// Proxy requests to the restaurants service under /api/restaurants
+app.use('/api/restaurants', restaurantsProxy);
+
+// Users proxy
+const usersProxy = createProxyMiddleware({
+  target: 'http://users-service:3003',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api': ''
+  }
+});
+
+app.use('/api/users', usersProxy);
 
 // 404 handler for unmatched routes (Express 5 compatible)
 app.use((req, res) => {
