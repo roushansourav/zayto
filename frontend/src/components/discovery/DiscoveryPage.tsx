@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Discovery.module.css';
 
 interface Restaurant {
@@ -108,11 +108,7 @@ const DiscoveryPage: React.FC = () => {
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-  useEffect(() => {
-    fetchRestaurants();
-  }, []);
-
-  const fetchRestaurants = async () => {
+  const fetchRestaurants = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/restaurants`);
@@ -121,8 +117,22 @@ const DiscoveryPage: React.FC = () => {
       }
       const data = await response.json();
       if (data.success) {
-        setRestaurants(data.data);
-        setFilteredRestaurants(data.data);
+        const normalized: Restaurant[] = (data.data || []).map((r: Partial<Restaurant>) => ({
+          id: (r.id as number) ?? 0,
+          name: r.name ?? '',
+          rating:
+            typeof r.rating === 'number'
+              ? r.rating
+              : Number.parseFloat((r as unknown as { rating?: string }).rating ?? '0') || 0,
+          description: r.description ?? '',
+          address: r.address ?? '',
+          phone: r.phone ?? '',
+          email: r.email ?? '',
+          cuisine_type: r.cuisine_type ?? '',
+          image_url: r.image_url ?? ''
+        }));
+        setRestaurants(normalized);
+        setFilteredRestaurants(normalized);
       } else {
         throw new Error(data.error || 'Failed to fetch restaurants');
       }
@@ -131,7 +141,11 @@ const DiscoveryPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_BASE_URL]);
+
+  useEffect(() => {
+    fetchRestaurants();
+  }, [fetchRestaurants]);
 
   const handleSearch = (query: string) => {
     if (!query.trim()) {
@@ -139,12 +153,14 @@ const DiscoveryPage: React.FC = () => {
       return;
     }
 
-    const filtered = restaurants.filter(
-      (restaurant) =>
-        restaurant.name.toLowerCase().includes(query.toLowerCase()) ||
-        restaurant.description.toLowerCase().includes(query.toLowerCase()) ||
-        restaurant.cuisine_type.toLowerCase().includes(query.toLowerCase())
-    );
+    const filtered = restaurants.filter((restaurant) => {
+      const q = query.toLowerCase();
+      return (
+        (restaurant.name || '').toLowerCase().includes(q) ||
+        (restaurant.description || '').toLowerCase().includes(q) ||
+        (restaurant.cuisine_type || '').toLowerCase().includes(q)
+      );
+    });
     setFilteredRestaurants(filtered);
   };
 
@@ -155,7 +171,7 @@ const DiscoveryPage: React.FC = () => {
     }
 
     const filtered = restaurants.filter(
-      (restaurant) => restaurant.cuisine_type.toLowerCase() === cuisine.toLowerCase()
+      (restaurant) => (restaurant.cuisine_type || '').toLowerCase() === cuisine.toLowerCase()
     );
     setFilteredRestaurants(filtered);
   };

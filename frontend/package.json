@@ -11,8 +11,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@module-federation/nextjs-mf": "^8.8.39",
     "@mui/material": "^7.3.2",
+    "@mui/icons-material": "^7.3.2",
     "next": "15.5.2",
     "next-intl": "^4.3.5",
     "react": "19.1.0",

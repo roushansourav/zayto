@@ -21,7 +21,7 @@ services:
   # Restaurants Service
   restaurants-service:
     build:
-      context: ./services/restaurants
+      context: ./backend/services/restaurants
       dockerfile: Dockerfile
     container_name: zayto_restaurants_service
     ports:
@@ -36,7 +36,7 @@ services:
   # API Gateway
   api-gateway:
     build:
-      context: ./api-gateway
+      context: ./backend/api-gateway
       dockerfile: Dockerfile
     container_name: zayto_api_gateway
     ports:
@@ -46,34 +46,21 @@ services:
     depends_on:
       - restaurants-service
 
-  # Discovery Microfrontend
-  discovery-microfrontend:
-    build:
-      context: ./microfrontends/discovery
-      dockerfile: Dockerfile
-    container_name: zayto_discovery_microfrontend
-    ports:
-      - "3002:3002"
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8080
-      NODE_ENV: development
-    depends_on:
-      - api-gateway
+  # Discovery Microfrontend (migrated into frontend host for now)
+  # NOTE: If separate, update paths accordingly.
 
-  # Host Application
+  # Host App
   host-app:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: zayto_host_app
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8080
-      NEXT_PUBLIC_DISCOVERY_URL: http://localhost:3002
-      NODE_ENV: development
+      NODE_ENV: production
     depends_on:
-      - discovery-microfrontend
+      - api-gateway
 
 volumes:
   postgres_data:
