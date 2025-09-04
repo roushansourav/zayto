@@ -22,12 +22,9 @@
   - [x] Implement API endpoints (`GET /restaurants`, `GET /restaurants/:id`).
   - [ ] Create Kubernetes manifests (`deployment.yaml`, `service.yaml`).
 
-- [x] **Frontend (Host Shell & `discovery` Microfrontend)**
-  - [x] Configure the existing Next.js app as the "host" shell.
-  - [x] Set up Module Federation.
-  - [x] Create the first microfrontend for "discovery" (browsing/searching restaurants).
-  - [x] The host shell will be responsible for the main layout, navbar, and i18n context.
-  - [x] The discovery microfrontend will contain the search bar and restaurant list components.
+- [x] **Frontend**
+  - [x] Configure the existing Next.js web app.
+  - [x] Implement discovery page and components.
   - [x] Connect the frontend to the API Gateway to fetch restaurant data.
 
 ## Phase 2: Users & Engagement
@@ -43,8 +40,8 @@
   - [ ] Create a new `reviews-service` to manage reviews.
   - [ ] Implement endpoints to create and list reviews.
 - [ ] **Frontend**
-  - [ ] Create a `profile` microfrontend for user profiles and order history.
-  - [ ] Create a `reviews` microfrontend for submitting and viewing reviews.
+  - [ ] Create a `profile` page for user profiles and order history.
+  - [ ] Create a `reviews` page for submitting and viewing reviews.
   - [ ] Add authentication UI flows: Google, Apple ID, and phone OTP login.
   - [ ] Persist auth state in the host app and secure API calls.
 
@@ -54,12 +51,12 @@
   - [ ] Create a new `partner-service` for restaurant owners.
   - [ ] Implement endpoints for profile, menu, and order management.
 - [ ] **Frontend**
-  - [ ] Create a new host application for the Partner Platform (`partner.zayto.com`).
-  - [ ] Create microfrontends for `partner-profile`, `partner-menu`, and `partner-orders`.
+  - [ ] Create a Partner Platform web app (`partner.zayto.com`).
+  - [ ] Implement partner profile, menu, and orders pages.
 
 ## Phase 4 & 5: Promotions, Admin & Advanced Features
 
 - [ ] **Backend (`promotions-service`, `admin-service`)**
   - [ ] Design and create services for managing coupons and admin-level tasks.
 - [ ] **Frontend**
-  - [ ] Create host applications and microfrontends for the Admin panel.
+  - [ ] Create Admin panel web app.
