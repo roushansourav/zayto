@@ -36,44 +36,41 @@ app.get('/', (req, res) => {
       'auth-google': '/api/users/auth/google',
       'auth-apple': '/api/users/auth/apple',
       'auth-otp-request': '/api/users/auth/otp/request',
-      'auth-otp-verify': '/api/users/auth/otp/verify'
+      'auth-otp-verify': '/api/users/auth/otp/verify',
+      'reviews': '/api/reviews'
     }
   });
 });
 
-// Proxy middleware configuration
-const restaurantsProxy = createProxyMiddleware({
-  target: 'http://restaurants-service:3001',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/api': ''
-  },
-  onError: (err, req, res) => {
-    console.error('Proxy error:', err);
-    res.status(503).json({
-      success: false,
-      error: 'Service temporarily unavailable',
-      message: 'The restaurants service is currently unavailable'
-    });
-  },
-  onProxyReq: (proxyReq, req, res) => {
-    console.log(`Proxying ${req.method} ${req.path} to restaurants service`);
-  }
-});
+// Proxy restaurants: /api/restaurants -> restaurants-service /restaurants
+app.use(
+  '/api/restaurants',
+  createProxyMiddleware({
+    target: 'http://restaurants-service:3001',
+    changeOrigin: true,
+    pathRewrite: (path, req) => '/restaurants'
+  })
+);
 
-// Proxy requests to the restaurants service under /api/restaurants
-app.use('/api/restaurants', restaurantsProxy);
+// Users proxy: /api/users/* -> users-service /*
+app.use(
+  '/api/users',
+  createProxyMiddleware({
+    target: 'http://users-service:3003',
+    changeOrigin: true,
+    pathRewrite: { '^/api/users': '' }
+  })
+);
 
-// Users proxy
-const usersProxy = createProxyMiddleware({
-  target: 'http://users-service:3003',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/api': ''
-  }
-});
-
-app.use('/api/users', usersProxy);
+// Reviews proxy: /api/reviews/* -> reviews-service /*
+app.use(
+  '/api/reviews',
+  createProxyMiddleware({
+    target: 'http://reviews-service:3004',
+    changeOrigin: true,
+    pathRewrite: (path) => '/reviews' + (path && path !== '/' ? path : '')
+  })
+);
 
 // 404 handler for unmatched routes (Express 5 compatible)
 app.use((req, res) => {

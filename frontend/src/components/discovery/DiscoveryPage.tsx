@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import SkeletonCard from './SkeletonCard';
+import LoadingButton from '../layout/LoadingButton';
 import styles from './Discovery.module.css';
 
 interface Restaurant {
@@ -25,6 +27,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant, onClick }) 
         <img 
           src={restaurant.image_url} 
           alt={restaurant.name}
+          loading="eager"
           className={styles.restaurantImage}
           onError={(e) => {
             e.currentTarget.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400';
@@ -75,9 +78,9 @@ const SearchBar: React.FC<{
           className={styles.searchInput}
           onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
         />
-        <button onClick={handleSearch} className={styles.searchButton}>
+        <LoadingButton onClick={handleSearch} className={styles.searchButton}>
           🔍 Search
-        </button>
+        </LoadingButton>
       </div>
       <div className={styles.filterContainer}>
         <span className={styles.filterLabel}>Filter by cuisine:</span>
@@ -105,6 +108,10 @@ const DiscoveryPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
+  const [reviews, setReviews] = useState<Array<{ id: number; rating: number; comment: string; created_at: string }>>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState('');
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -178,17 +185,54 @@ const DiscoveryPage: React.FC = () => {
 
   const handleRestaurantClick = (restaurant: Restaurant) => {
     setSelectedRestaurant(restaurant);
+    // Fetch reviews
+    fetch(`${API_BASE_URL}/api/reviews?restaurant_id=${restaurant.id}`)
+      .then((r) => r.json())
+      .then((data) => setReviews(Array.isArray(data.data) ? data.data : []))
+      .catch(() => setReviews([]));
   };
 
   const closeModal = () => {
     setSelectedRestaurant(null);
+    setReviews([]);
+    setNewRating(5);
+    setNewComment('');
+  };
+
+  const submitReview = async () => {
+    if (!selectedRestaurant) return;
+    try {
+      setSubmitting(true);
+      const res = await fetch(`${API_BASE_URL}/api/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurant_id: selectedRestaurant.id, rating: newRating, comment: newComment })
+      });
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      if (data.success && data.data) {
+        setReviews((prev) => [data.data, ...prev]);
+        setNewRating(5);
+        setNewComment('');
+      }
+    } catch (_) {
+      // noop for demo
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner}></div>
-        <p>Loading restaurants...</p>
+      <div className={styles.resultsContainer}>
+        <div className={styles.resultsHeader}>
+          <h2>Restaurants (loading...)</h2>
+        </div>
+        <div className={styles.restaurantsGrid}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -249,6 +293,7 @@ const DiscoveryPage: React.FC = () => {
               <img
                 src={selectedRestaurant.image_url}
                 alt={selectedRestaurant.name}
+                loading="eager"
                 className={styles.modalImage}
                 onError={(e) => {
                   e.currentTarget.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400';
@@ -262,6 +307,44 @@ const DiscoveryPage: React.FC = () => {
                 <p className={styles.modalAddress}>{selectedRestaurant.address}</p>
                 <p className={styles.modalPhone}>{selectedRestaurant.phone}</p>
                 <p className={styles.modalEmail}>{selectedRestaurant.email}</p>
+
+                <div style={{ marginTop: 24 }}>
+                  <h3>Reviews</h3>
+                  {reviews.length === 0 ? (
+                    <p>No reviews yet.</p>
+                  ) : (
+                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                      {reviews.map((rev) => (
+                        <li key={rev.id} style={{ borderTop: '1px solid #eee', padding: '8px 0' }}>
+                          <strong>⭐ {rev.rating}</strong>
+                          <div>{rev.comment}</div>
+                          <small style={{ color: '#666' }}>{new Date(rev.created_at).toLocaleString()}</small>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <label>
+                      Rating:
+                      <select value={newRating} onChange={(e) => setNewRating(Number(e.target.value))} style={{ marginLeft: 6 }}>
+                        {[1,2,3,4,5].map((n) => (
+                          <option key={n} value={n}>{n}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Write a review..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      style={{ flex: 1, padding: 8, border: '1px solid #ddd', borderRadius: 4 }}
+                    />
+                    <LoadingButton onClick={submitReview} loading={submitting} className={styles.searchButton}>
+                      Submit
+                    </LoadingButton>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

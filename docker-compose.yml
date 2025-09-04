@@ -46,6 +46,7 @@ services:
     depends_on:
       - restaurants-service
       - users-service
+      - reviews-service
 
   # Discovery Microfrontend (migrated into frontend host for now)
   # NOTE: If separate, update paths accordingly.
@@ -62,6 +63,21 @@ services:
       NODE_ENV: production
     depends_on:
       - api-gateway
+
+  # Reviews Service
+  reviews-service:
+    build:
+      context: ./backend/services/reviews
+      dockerfile: Dockerfile
+    container_name: zayto_reviews_service
+    ports:
+      - "3004:3004"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://zayto:zayto_password@postgres:5432/zayto_db
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   # Users Service
   users-service:
