@@ -1,0 +1,15 @@
+{
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel"
+  },
+  "auth": {
+    "login": "Sign In",
+    "register": "Sign Up",
+    "phone": "Phone",
+    "email": "Email",
+    "password": "Password"
+  }
+}
+
+
