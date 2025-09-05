@@ -4,20 +4,42 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+*.log
 
 # Env
 .env*
 !.env.example
 
 # Builds
-.out/
+out/
 dist/
 build/
 .next/
+.vercel
+.turbo
+.eslintcache
+.tsbuildinfo
+.tsbuildinfo*
 .expo/
 .expo-shared/
+web-build/
 coverage/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Expo / React Native
+android/
+ios/
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+*.cer
+
+# PIDs
+pids
+*.pid
+*.seed
+*.pid.lock
