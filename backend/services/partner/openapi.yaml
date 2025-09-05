@@ -1,0 +1,184 @@
+openapi: 3.1.0
+info:
+  title: Partner Service API
+  version: 1.0.0
+servers:
+  - url: /api/partner
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200': { description: OK }
+  /restaurants:
+    get:
+      summary: List partner restaurants
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: List of restaurants }
+    post:
+      summary: Create restaurant
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                address: { type: string }
+                city: { type: string }
+                lat: { type: number }
+                lon: { type: number }
+              required: [ name ]
+      responses:
+        '201': { description: Created }
+  /restaurants/{id}/hours:
+    get:
+      summary: Get business hours
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    put:
+      summary: Replace business hours
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  day_of_week: { type: integer }
+                  open_time: { type: string }
+                  close_time: { type: string }
+                  is_closed: { type: boolean }
+      responses:
+        '200': { description: Saved }
+  /restaurants/{id}/categories:
+    get:
+      summary: List categories
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create category
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                position: { type: integer }
+      responses:
+        '201': { description: Created }
+  /restaurants/{id}/menu-items:
+    get:
+      summary: List menu items
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: categoryId
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create menu item
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category_id: { type: integer }
+                name: { type: string }
+                description: { type: string }
+                price_cents: { type: integer }
+                is_available: { type: boolean }
+      responses:
+        '201': { description: Created }
+  /restaurants/{id}/menu-items/{itemId}/image:
+    post:
+      summary: Upload image for item
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: itemId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201': { description: Uploaded }
+    delete:
+      summary: Remove image for item
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: itemId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Deleted }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+
