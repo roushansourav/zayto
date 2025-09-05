@@ -10,8 +10,10 @@ const port = process.env.PORT || 8080;
 // Enable CORS
 app.use(cors());
 
-// Parse JSON bodies
-app.use(express.json());
+// IMPORTANT: Do not parse JSON globally before proxies.
+// Some proxy targets expect to receive the raw request stream.
+// If we need JSON parsing for local (non-proxied) routes in future,
+// mount it only on those specific routes.
 
 // Health check endpoint
 app.get('/health', (req, res) => {
