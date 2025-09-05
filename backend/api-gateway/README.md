@@ -1,5 +1,7 @@
 # API Gateway
 
+For full local development and production deployment instructions, see `../../docs/LOCAL_DEV_AND_DEPLOYMENT.md`.
+
 The API Gateway service for the Zayto microservices architecture. This service acts as the single entry point for all client requests and handles routing, authentication, and request/response transformation.
 
 ## Features

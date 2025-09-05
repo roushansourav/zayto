@@ -1,5 +1,7 @@
 # Restaurants Service
 
+For detailed local dev and deployment instructions, see `../../../docs/LOCAL_DEV_AND_DEPLOYMENT.md`.
+
 The Restaurants microservice for the Zayto platform. This service handles all restaurant-related operations including restaurant data, menus, and basic restaurant information.
 
 ## Features

@@ -36,14 +36,14 @@
   - [x] Add OAuth login: Google and Apple ID (token verification, user linking).
   - [x] Add phone number login with OTP (request/verify) using a provider (e.g., Twilio).
   - [x] Issue and validate JWT access/refresh tokens; session management.
-- [ ] **Backend (`reviews-service`)**
-  - [ ] Create a new `reviews-service` to manage reviews.
-  - [ ] Implement endpoints to create and list reviews.
-- [ ] **Frontend**
-  - [ ] Create a `profile` page for user profiles and order history.
-  - [ ] Create a `reviews` page for submitting and viewing reviews.
-  - [ ] Add authentication UI flows: Google, Apple ID, and phone OTP login.
-  - [ ] Persist auth state in the host app and secure API calls.
+- [x] **Backend (`reviews-service`)**
+  - [x] Create a new `reviews-service` to manage reviews.
+  - [x] Implement endpoints to create and list reviews.
+- [x] **Frontend**
+  - [x] Create a `profile` page for user profiles and order history.
+  - [x] Create a `reviews` page for submitting and viewing reviews.
+  - [x] Add authentication UI flows: Google, Apple ID, and phone OTP login.
+  - [x] Persist auth state in the host app and secure API calls.
 
 ## Phase 3: Restaurant Partner Platform
 

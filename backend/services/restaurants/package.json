@@ -4,6 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "cross-env ENV_FILE=.env.dev nodemon index.js",
+    "dev:staging": "cross-env ENV_FILE=.env.staging nodemon index.js",
+    "dev:prod": "cross-env ENV_FILE=.env.prod node index.js",
     "test": "jest --runInBand"
   },
   "keywords": [],
@@ -11,11 +15,14 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "express": "^5.1.0",
     "pg": "^8.16.3"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "jest": "^29.7.0",
+    "nodemon": "^3.0.1",
     "supertest": "^7.0.0"
   }
 }

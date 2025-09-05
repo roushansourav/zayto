@@ -1,8 +1,19 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { useAuth } from '../src/lib/AuthContext';
 import LoadingButton from '../src/components/layout/LoadingButton';
+import Container from '@mui/material/Container';
+import Paper from '@mui/material/Paper';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 
 const ProfilePage: React.FC = () => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+  const { auth, logout: ctxLogout } = useAuth();
 
   const [mode, setMode] = useState<'email' | 'phone'>('email');
 
@@ -23,7 +34,13 @@ const ProfilePage: React.FC = () => {
   const [otpRequested, setOtpRequested] = useState(false);
   const [otpCode, setOtpCode] = useState('');
 
-  const isLoggedIn = useMemo(() => Boolean(token && (email || phone)), [token, email, phone]);
+  const isLoggedIn = useMemo(() => Boolean((token || auth.token) && (email || auth.email)), [token, email, phone, auth]);
+
+  useEffect(() => {
+    if (!(auth.token || token)) {
+      window.location.href = '/login';
+    }
+  }, [auth.token, token]);
 
   const registerWithEmail = async () => {
     setError(null); setLoading(true);
@@ -117,68 +134,69 @@ const ProfilePage: React.FC = () => {
 
   const logout = () => {
     setToken(null); setProfile(null); setPassword(''); setName(''); setOtpRequested(false); setOtpCode('');
+    ctxLogout();
   };
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: 800, margin: '0 auto', padding: 20 }}>
-      <h1>Profile & Authentication</h1>
+    <Container maxWidth="md" sx={{ py: 6 }}>
+      <Typography variant="h4" gutterBottom>Profile & Authentication</Typography>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <button onClick={() => setMode('email')} style={{ padding: '8px 12px', background: mode==='email' ? '#1976d2' : '#eee', color: mode==='email' ? '#fff' : '#000', border: 'none', borderRadius: 4 }}>Email</button>
-        <button onClick={() => setMode('phone')} style={{ padding: '8px 12px', background: mode==='phone' ? '#1976d2' : '#eee', color: mode==='phone' ? '#fff' : '#000', border: 'none', borderRadius: 4 }}>Phone OTP</button>
-      </div>
+      <Paper elevation={0} sx={{ mb: 2 }}>
+        <Tabs value={mode} onChange={(_, v) => setMode(v)} aria-label="auth modes" sx={{ borderBottom: '1px solid #eee' }}>
+          <Tab value="email" label="Email" />
+          <Tab value="phone" label="Phone OTP" />
+        </Tabs>
+      </Paper>
 
-      {error && (
-        <div style={{ background: '#fdecea', color: '#b71c1c', padding: 12, borderRadius: 6, marginBottom: 12 }}>{error}</div>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       {mode === 'email' && (
-        <div style={{ border: '1px solid #eee', borderRadius: 8, padding: 16, marginBottom: 16 }}>
-          <h3>Email & Password</h3>
-          <div style={{ display: 'grid', gap: 8, maxWidth: 400 }}>
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ padding: 8, border: '1px solid #ddd', borderRadius: 4 }} />
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ padding: 8, border: '1px solid #ddd', borderRadius: 4 }} />
-            <input type="text" placeholder="Name (for registration)" value={name} onChange={(e) => setName(e.target.value)} style={{ padding: 8, border: '1px solid #ddd', borderRadius: 4 }} />
-            <div style={{ display: 'flex', gap: 8 }}>
-              <LoadingButton onClick={registerWithEmail} loading={loading} style={{ padding: '8px 12px', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4 }}>Register</LoadingButton>
-              <LoadingButton onClick={loginWithEmail} loading={loading} style={{ padding: '8px 12px', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4 }}>Login</LoadingButton>
-            </div>
-          </div>
-        </div>
+        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h6" gutterBottom>Email & Password</Typography>
+          <Box sx={{ display: 'grid', gap: 1.5, maxWidth: 420 }}>
+            <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
+            <TextField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth />
+            <TextField label="Name (for registration)" value={name} onChange={(e) => setName(e.target.value)} fullWidth />
+            <Box sx={{ display: 'flex', gap: 1.5 }}>
+              <LoadingButton onClick={registerWithEmail} loading={loading} variant="contained">Register</LoadingButton>
+              <LoadingButton onClick={loginWithEmail} loading={loading} variant="contained">Login</LoadingButton>
+            </Box>
+          </Box>
+        </Paper>
       )}
 
       {mode === 'phone' && (
-        <div style={{ border: '1px solid #eee', borderRadius: 8, padding: 16, marginBottom: 16 }}>
-          <h3>Phone OTP</h3>
-          <div style={{ display: 'grid', gap: 8, maxWidth: 400 }}>
-            <input type="tel" placeholder="Phone e.g. +15550001111" value={phone} onChange={(e) => setPhone(e.target.value)} style={{ padding: 8, border: '1px solid #ddd', borderRadius: 4 }} />
+        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h6" gutterBottom>Phone OTP</Typography>
+          <Box sx={{ display: 'grid', gap: 1.5, maxWidth: 420 }}>
+            <TextField label="Phone e.g. +15550001111" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth />
             {!otpRequested ? (
-              <LoadingButton onClick={requestOtp} loading={loading} style={{ padding: '8px 12px', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4 }}>Request OTP</LoadingButton>
+              <LoadingButton onClick={requestOtp} loading={loading} variant="contained">Request OTP</LoadingButton>
             ) : (
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input type="text" placeholder="Enter OTP" value={otpCode} onChange={(e) => setOtpCode(e.target.value)} style={{ padding: 8, border: '1px solid #ddd', borderRadius: 4, flex: 1 }} />
-                <LoadingButton onClick={verifyOtp} loading={loading} style={{ padding: '8px 12px', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4 }}>Verify</LoadingButton>
-              </div>
+              <Box sx={{ display: 'flex', gap: 1.5 }}>
+                <TextField label="Enter OTP" value={otpCode} onChange={(e) => setOtpCode(e.target.value)} fullWidth />
+                <LoadingButton onClick={verifyOtp} loading={loading} variant="contained">Verify</LoadingButton>
+              </Box>
             )}
-          </div>
-        </div>
+          </Box>
+        </Paper>
       )}
 
-      <div style={{ border: '1px solid #eee', borderRadius: 8, padding: 16 }}>
-        <h3>Profile</h3>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <LoadingButton onClick={fetchProfile} loading={loading} style={{ padding: '8px 12px', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4 }} disabled={!isLoggedIn}>Fetch Profile</LoadingButton>
-          <button onClick={logout} style={{ padding: '8px 12px', background: '#eee', border: '1px solid #ddd', borderRadius: 4 }}>Logout</button>
-        </div>
+      <Paper elevation={1} sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom>Profile</Typography>
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+          <LoadingButton onClick={fetchProfile} loading={loading} variant="contained" disabled={!isLoggedIn}>Fetch Profile</LoadingButton>
+          <Button onClick={logout} variant="outlined">Logout</Button>
+        </Box>
         {profile && (
-          <div style={{ marginTop: 12 }}>
+          <Box sx={{ mt: 2 }}>
             <div><strong>Email:</strong> {profile.email}</div>
             {profile.name && <div><strong>Name:</strong> {profile.name}</div>}
-          </div>
+          </Box>
         )}
-        {!profile && <p style={{ color: '#666' }}>No profile loaded.</p>}
-      </div>
-    </div>
+        {!profile && <Typography variant="body2" color="text.secondary">No profile loaded.</Typography>}
+      </Paper>
+    </Container>
   );
 };
 

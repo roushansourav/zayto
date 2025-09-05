@@ -1,7 +1,9 @@
+const dotenv = require('dotenv');
+dotenv.config({ path: process.env.ENV_FILE || undefined });
 const express = require('express');
 const { Pool } = require('pg');
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 // Enable JSON parsing
 app.use(express.json());
@@ -148,11 +150,28 @@ app.get('/', (req, res) => {
   res.send('Hello from the Restaurants Service!');
 });
 
-// Get all restaurants with optional filtering
+// Get all restaurants with optional filtering, pagination, and sorting
 app.get('/restaurants', async (req, res) => {
   try {
     const { cuisine_type, search } = req.query;
-    let query = 'SELECT * FROM restaurants';
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+
+    // Sorting: sort=rating|name|created_at and optional sort_dir=asc|desc or sort=field:dir
+    let sortField = 'rating';
+    let sortDir = 'DESC';
+    if (typeof req.query.sort === 'string') {
+      const parts = req.query.sort.split(':');
+      const field = parts[0];
+      const dir = (parts[1] || '').toUpperCase();
+      if (['rating', 'name', 'created_at'].includes(field)) sortField = field;
+      if (['ASC', 'DESC'].includes(dir)) sortDir = dir;
+    } else if (typeof req.query.sort_dir === 'string') {
+      const dir = req.query.sort_dir.toUpperCase();
+      if (['ASC', 'DESC'].includes(dir)) sortDir = dir;
+    }
+
+    let baseQuery = 'FROM restaurants';
     let params = [];
     let conditions = [];
 
@@ -167,20 +186,31 @@ app.get('/restaurants', async (req, res) => {
     }
 
     if (conditions.length > 0) {
-      query += ' WHERE ' + conditions.join(' AND ');
+      baseQuery += ' WHERE ' + conditions.join(' AND ');
     }
 
-    query += ' ORDER BY rating DESC, name ASC';
-
     const client = await pool.connect();
-    const result = await client.query(query, params);
-    client.release();
-    
-    res.json({
-      success: true,
-      data: result.rows,
-      count: result.rows.length
-    });
+    try {
+      // Total count
+      const totalResult = await client.query(`SELECT COUNT(*) ${baseQuery}`, params);
+      const total = parseInt(totalResult.rows[0].count, 10) || 0;
+
+      // Data with pagination
+      const offset = (page - 1) * limit;
+      const dataResult = await client.query(
+        `SELECT * ${baseQuery} ORDER BY ${sortField} ${sortDir}, id ASC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+        [...params, limit, offset]
+      );
+
+      res.json({
+        success: true,
+        data: dataResult.rows,
+        count: dataResult.rows.length,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
+      });
+    } finally {
+      client.release();
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, error: 'Error fetching restaurants' });

@@ -1,21 +1,21 @@
 import React from 'react';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 
-interface LoadingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface LoadingButtonProps extends React.ComponentProps<typeof Button> {
   loading?: boolean;
-  children: React.ReactNode;
 }
 
-const LoadingButton: React.FC<LoadingButtonProps> = ({ loading = false, children, disabled, className = '', ...rest }) => {
+const LoadingButton: React.FC<LoadingButtonProps> = ({ loading = false, children, disabled, sx, ...rest }) => {
   return (
-    <button
+    <Button
       {...rest}
       disabled={loading || disabled}
-      className={`${className}`}
-      style={{
+      sx={{
         position: 'relative',
-        opacity: loading || disabled ? 0.8 : 1,
-        pointerEvents: loading || disabled ? 'none' as const : 'auto',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        opacity: loading || disabled ? 0.9 : 1,
+        ...sx
       }}
     >
       {children}
@@ -30,13 +30,16 @@ const LoadingButton: React.FC<LoadingButtonProps> = ({ loading = false, children
           }}
         />
       )}
+      {loading && (
+        <CircularProgress size={18} sx={{ position: 'absolute' }} color="inherit" />
+      )}
       <style>{`
         @keyframes wave {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
         }
       `}</style>
-    </button>
+    </Button>
   );
 };
 

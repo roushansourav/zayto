@@ -1,9 +1,11 @@
+const dotenv = require('dotenv');
+dotenv.config({ path: process.env.ENV_FILE || undefined });
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
 
 // Enable CORS
 app.use(cors());
@@ -37,16 +39,29 @@ app.get('/', (req, res) => {
       'auth-apple': '/api/users/auth/apple',
       'auth-otp-request': '/api/users/auth/otp/request',
       'auth-otp-verify': '/api/users/auth/otp/verify',
-      'reviews': '/api/reviews'
+      'reviews': '/api/reviews',
+      'partner': '/api/partner',
+      'partner-orders': '/api/partner/orders',
+      'orders': '/api/orders'
     }
   });
 });
+
+// Configurable targets for local dev
+const TARGETS = {
+  RESTAURANTS: process.env.RESTAURANTS_URL || 'http://restaurants-service:3001',
+  USERS: process.env.USERS_URL || 'http://users-service:3003',
+  REVIEWS: process.env.REVIEWS_URL || 'http://reviews-service:3004',
+  PARTNER: process.env.PARTNER_URL || 'http://partner-service:3005',
+  ORDERS: process.env.ORDERS_URL || 'http://orders-service:3006',
+  NOTIFICATIONS: process.env.NOTIFICATIONS_URL || 'http://notifications-service:3007'
+};
 
 // Proxy restaurants: /api/restaurants -> restaurants-service /restaurants
 app.use(
   '/api/restaurants',
   createProxyMiddleware({
-    target: 'http://restaurants-service:3001',
+    target: TARGETS.RESTAURANTS,
     changeOrigin: true,
     pathRewrite: (path, req) => '/restaurants'
   })
@@ -56,7 +71,7 @@ app.use(
 app.use(
   '/api/users',
   createProxyMiddleware({
-    target: 'http://users-service:3003',
+    target: TARGETS.USERS,
     changeOrigin: true,
     pathRewrite: { '^/api/users': '' }
   })
@@ -66,9 +81,49 @@ app.use(
 app.use(
   '/api/reviews',
   createProxyMiddleware({
-    target: 'http://reviews-service:3004',
+    target: TARGETS.REVIEWS,
     changeOrigin: true,
     pathRewrite: (path) => '/reviews' + (path && path !== '/' ? path : '')
+  })
+);
+
+// Partner proxy: /api/partner/* -> partner-service /*
+app.use(
+  '/api/partner',
+  createProxyMiddleware({
+    target: TARGETS.PARTNER,
+    changeOrigin: true,
+    pathRewrite: { '^/api/partner': '' }
+  })
+);
+
+// Orders proxy: /api/partner/orders/* -> orders-service /*
+app.use(
+  '/api/partner/orders',
+  createProxyMiddleware({
+    target: TARGETS.ORDERS,
+    changeOrigin: true,
+    pathRewrite: { '^/api/partner': '' }
+  })
+);
+
+// Orders public proxy
+app.use(
+  '/api/orders',
+  createProxyMiddleware({
+    target: TARGETS.ORDERS,
+    changeOrigin: true,
+    pathRewrite: { '^/api': '' }
+  })
+);
+
+// Notifications proxy
+app.use(
+  '/api/notifications',
+  createProxyMiddleware({
+    target: TARGETS.NOTIFICATIONS,
+    changeOrigin: true,
+    pathRewrite: { '^/api': '' }
   })
 );
 

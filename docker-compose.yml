@@ -47,6 +47,9 @@ services:
       - restaurants-service
       - users-service
       - reviews-service
+      - partner-service
+      - orders-service
+      - notifications-service
 
   # Discovery Microfrontend (migrated into frontend host for now)
   # NOTE: If separate, update paths accordingly.
@@ -89,6 +92,54 @@ services:
       - "3003:3003"
     environment:
       NODE_ENV: development
+
+  # Partner Service
+  partner-service:
+    build:
+      context: ./backend/services/partner
+      dockerfile: Dockerfile
+    container_name: zayto_partner_service
+    ports:
+      - "3005:3005"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://zayto:zayto_password@postgres:5432/zayto_db
+      JWT_SECRET: dev_secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Orders Service
+  orders-service:
+    build:
+      context: ./backend/services/orders
+      dockerfile: Dockerfile
+    container_name: zayto_orders_service
+    ports:
+      - "3006:3006"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://zayto:zayto_password@postgres:5432/zayto_db
+      JWT_SECRET: dev_secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Notifications Service
+  notifications-service:
+    build:
+      context: ./backend/services/notifications
+      dockerfile: Dockerfile
+    container_name: zayto_notifications_service
+    ports:
+      - "3007:3007"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://zayto:zayto_password@postgres:5432/zayto_db
+      JWT_SECRET: dev_secret
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:

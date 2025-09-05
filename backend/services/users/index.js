@@ -1,3 +1,5 @@
+const dotenv = require('dotenv');
+dotenv.config({ path: process.env.ENV_FILE || undefined });
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
@@ -5,7 +7,7 @@ const appleSignin = require('apple-signin-auth');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-const port = 3003;
+const port = process.env.PORT || 3003;
 
 app.use(express.json());
 
@@ -15,6 +17,8 @@ const phoneOtps = new Map(); // key: phone, value: { code, expiresAt }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_do_not_use_in_prod';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const ALLOW_DEV_OAUTH = (process.env.ALLOW_DEV_OAUTH || 'true').toLowerCase() === 'true';
+const APPLE_AUDIENCE = process.env.APPLE_AUDIENCE || undefined;
 const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
 // Health
@@ -73,15 +77,17 @@ app.post('/auth/google', async (req, res) => {
     }
     let email = '';
     let name = '';
-    if (googleClient) {
+    if (googleClient && GOOGLE_CLIENT_ID) {
       const ticket = await googleClient.verifyIdToken({ idToken, audience: GOOGLE_CLIENT_ID });
       const payload = ticket.getPayload();
       email = payload?.email || '';
       name = payload?.name || payload?.given_name || '';
-    } else {
+    } else if (ALLOW_DEV_OAUTH) {
       // Dev fallback (no verification); DO NOT use in production
       email = `dev_${uuidv4()}@example.com`;
       name = 'Google User';
+    } else {
+      return res.status(401).json({ success: false, error: 'OAuth verification disabled without GOOGLE_CLIENT_ID' });
     }
     if (!email) {
       return res.status(400).json({ success: false, error: 'Unable to resolve email from token' });
@@ -109,11 +115,14 @@ app.post('/auth/apple', async (req, res) => {
     let name = '';
     try {
       const payload = await appleSignin.verifyIdToken(identityToken, {
-        // audience: 'com.your.bundle.id', // set via env if needed
+        audience: APPLE_AUDIENCE,
       });
       email = payload?.email || '';
       name = 'Apple User';
-    } catch {
+    } catch (e) {
+      if (!ALLOW_DEV_OAUTH) {
+        return res.status(401).json({ success: false, error: 'Invalid Apple token' });
+      }
       // Dev fallback if verification fails/missing config
       email = `dev_${uuidv4()}@apple.example.com`;
       name = 'Apple User';
@@ -142,7 +151,6 @@ app.post('/auth/otp/request', (req, res) => {
   const code = (Math.floor(100000 + Math.random() * 900000)).toString();
   const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
   phoneOtps.set(phone, { code, expiresAt });
-  // TODO: integrate SMS provider (e.g., Twilio). For now we return code in dev.
   const body = { success: true, data: { phone } };
   if (process.env.NODE_ENV !== 'production') body.data.code = code;
   return res.json(body);
